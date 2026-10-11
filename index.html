@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建築物室內裝修工程管理乙級 - 學科模擬測驗</title>
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --success-color: #34a853;
+            --error-color: #ea4335;
+            --warning-color: #fbbc05;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #202124;
+            --border-color: #dadce0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #e8f0fe;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .timer {
+            font-size: 18px;
+            color: #d93025;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1557b0;
+        }
+
+        .question-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+
+        .question-header {
+            font-weight: bold;
+            font-size: 17px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        .badge-single { background-color: #1a73e8; }
+        .badge-multi { background-color: #e37400; }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .option-item {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item:hover {
+            background-color: #f1f3f4;
+        }
+
+        .option-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .result-panel {
+            text-align: center;
+            padding: 20px;
+            background: #f1f3f4;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .score-display {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .pass { color: var(--success-color); }
+        .fail { color: var(--error-color); }
+
+        .correct-ans {
+            background-color: #e6f4ea !important;
+            border-color: var(--success-color) !important;
+        }
+
+        .wrong-ans {
+            background-color: #fce8e6 !important;
+            border-color: var(--error-color) !important;
+        }
+
+        .status-tag {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        #loading {
+            text-align: center;
+            font-size: 18px;
+            padding: 40px;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>建築物室內裝修工程管理乙級 學科模擬測驗</h1>
+        <p>總題數：80題 (單選60題、複選20題) | 時間：100分鐘 | 及格標準：60分</p>
+    </header>
+
+    <div id="loading">題庫載入中，請稍候...</div>
+
+    <div id="start-screen" class="hidden" style="text-align: center; padding: 40px 0;">
+        <p id="pool-info">題庫載入完成！</p>
+        <button class="btn" onclick="startQuiz()">開始測驗</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div class="info-bar">
+            <span>進度：<span id="current-count">0</span> / 80 題</span>
+            <span class="timer">剩餘時間：<span id="time-display">100:00</span></span>
+        </div>
+
+        <form id="quiz-form">
+            <div id="questions-container"></div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="button" class="btn" onclick="submitQuiz()">交卷並計算成績</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <div class="result-panel">
+            <h2>測驗結果</h2>
+            <div id="score-text" class="score-display">0 分</div>
+            <p id="pass-text" style="font-size: 20px; font-weight: bold;"></p>
+            <p id="time-used-text"></p>
+            <button class="btn" onclick="startQuiz()">再次測驗</button>
+        </div>
+
+        <h3>題目檢討與詳細解析</h3>
+        <div id="review-container"></div>
+    </div>
+</div>
+
+<script>
+    const JSON_FILES = [
+        'quiz_12600.json',
+        'quiz_90007.json',
+        'quiz_90006.json',
+        'quiz_90008.json',
+        'quiz_90009.json'
+    ];
+
+    let fullSinglePool = [];
+    let fullMultiPool = [];
+    let currentQuiz = [];
+    let timerInterval = null;
+    let timeRemaining = 100 * 60;
+
+    async function loadQuestionPools() {
+        try {
+            for (const file of JSON_FILES) {
+                const res = await fetch(file);
+                if (!res.ok) throw new Error(`無法載入檔案: ${file}`);
+                const data = await res.json();
+                
+                data.forEach(q => {
+                    if (q.type === 'single') {
+                        fullSinglePool.push(q);
+                    } else if (q.type === 'multi') {
+                        fullMultiPool.push(q);
+                    }
+                });
+            }
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+            document.getElementById('pool-info').innerText = 
+                `題庫載入成功！共載入單選題 ${fullSinglePool.length} 題，複選題 ${fullMultiPool.length} 題。`;
+        } catch (err) {
+            document.getElementById('loading').innerHTML = 
+                `<span style="color:red">題庫載入失敗：${err.message}<br>請確認 JSON 檔案是否存在，且需經由網頁伺服器開啟。</span>`;
+        }
+    }
+
+    function shuffle(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function startQuiz() {
+        clearInterval(timerInterval);
+        
+        const singleCount = Math.min(60, fullSinglePool.length);
+        const multiCount = Math.min(20, fullMultiPool.length);
+
+        const selectedSingle = shuffle(fullSinglePool).slice(0, singleCount);
+        const selectedMulti = shuffle(fullMultiPool).slice(0, multiCount);
+
+        currentQuiz = shuffle([...selectedSingle, ...selectedMulti]);
+
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+
+        renderQuestions();
+        startTimer();
+        window.scrollTo(0, 0);
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+        document.getElementById('current-count').innerText = currentQuiz.length;
+
+        currentQuiz.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+
+            const isMulti = q.type === 'multi';
+            const badgeText = isMulti ? '複選題' : '單選題';
+            const badgeClass = isMulti ? 'badge-multi' : 'badge-single';
+            const inputType = isMulti ? 'checkbox' : 'radio';
+
+            let optionsHTML = '';
+            
+            // 保持選項原始順序 (1, 2, 3, 4)
+            q.options.forEach(opt => {
+                optionsHTML += `
+                    <label class="option-item">
+                        <input type="${inputType}" name="q_${index}" value="${opt.val}">
+                        <span>(${opt.val}) ${opt.text}</span>
+                    </label>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="question-header">
+                    <span class="badge ${badgeClass}">${badgeText}</span>
+                    <span>${index + 1}. [${q.category}] ${q.question}</span>
+                </div>
+                <div class="options-list">${optionsHTML}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function startTimer() {
+        timeRemaining = 100 * 60;
+        updateTimerDisplay();
+
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            updateTimerDisplay();
+
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                alert('考試時間到！系統將自動交卷。');
+                submitQuiz();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+        const s = (timeRemaining % 60).toString().padStart(2, '0');
+        document.getElementById('time-display').innerText = `${m}:${s}`;
+    }
+
+    function submitQuiz() {
+        clearInterval(timerInterval);
+
+        let correctCount = 0;
+        const reviewContainer = document.getElementById('review-container');
+        reviewContainer.innerHTML = '';
+
+        currentQuiz.forEach((q, index) => {
+            const selectedNodes = document.querySelectorAll(`input[name="q_${index}"]:checked`);
+            
+            const userAnswers = Array.from(selectedNodes).map(n => n.value).sort();
+            const standardAnswers = [...q.answer].sort();
+
+            const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(standardAnswers);
+            if (isCorrect) correctCount++;
+
+            const reviewCard = document.createElement('div');
+            reviewCard.className = `question-card ${isCorrect ? '' : 'wrong-ans'}`;
+
+            const isMulti = q.type === 'multi';
+            const badgeText = isMulti ? '複選題' : '單選題';
+            const badgeClass = isMulti ? 'badge-multi' : 'badge-single';
+
+            let optionsHTML = '';
+            q.options.forEach(opt => {
+                const isUserSelected = userAnswers.includes(opt.val);
+                const isStandard = standardAnswers.includes(opt.val);
+
+                let optionStyle = '';
+                let statusMark = '';
+
+                if (isStandard) {
+                    optionStyle = 'correct-ans';
+                    statusMark = ' <span class="status-tag pass">[標準答案]</span>';
+                }
+                if (isUserSelected && !isStandard) {
+                    optionStyle = 'wrong-ans';
+                    statusMark = ' <span class="status-tag fail">[錯誤標記：多選此項]</span>';
+                } else if (!isUserSelected && isStandard) {
+                    statusMark += ' <span class="status-tag fail">[錯誤標記：漏選此項]</span>';
+                }
+
+                optionsHTML += `
+                    <div class="option-item ${optionStyle}">
+                        <input type="${isMulti ? 'checkbox' : 'radio'}" disabled ${isUserSelected ? 'checked' : ''}>
+                        <span>(${opt.val}) ${opt.text} ${statusMark}</span>
+                    </div>
+                `;
+            });
+
+            reviewCard.innerHTML = `
+                <div class="question-header">
+                    <span class="badge ${badgeClass}">${badgeText}</span>
+                    <span>${index + 1}. [${q.category}] ${q.question}</span>
+                    <span class="status-tag ${isCorrect ? 'pass' : 'fail'}" style="margin-left: auto;">
+                        ${isCorrect ? '✓ 回答正確' : '✗ 回答錯誤'}
+                    </span>
+                </div>
+                <div class="options-list">${optionsHTML}</div>
+                <div style="margin-top: 10px; font-size: 14px; color: #555;">
+                    你的答案：${userAnswers.length > 0 ? userAnswers.join(', ') : '未作答'} | 
+                    標準答案：${standardAnswers.join(', ')}
+                </div>
+            `;
+            reviewContainer.appendChild(reviewCard);
+        });
+
+        const score = (correctCount * 1.25).toFixed(1);
+        const isPass = score >= 60;
+        const timeUsed = (100 * 60) - timeRemaining;
+        const usedM = Math.floor(timeUsed / 60);
+        const usedS = timeUsed % 60;
+
+        document.getElementById('score-text').innerText = `${score} 分`;
+        document.getElementById('score-text').className = `score-display ${isPass ? 'pass' : 'fail'}`;
+        
+        const passTextNode = document.getElementById('pass-text');
+        passTextNode.innerText = isPass ? '恭喜！成績及格' : '遺憾！未達 60 分及格標準';
+        passTextNode.className = isPass ? 'pass' : 'fail';
+
+        document.getElementById('time-used-text').innerText = `測驗用時：${usedM} 分 ${usedS} 秒`;
+
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = loadQuestionPools;
+</script>
+
+</body>
+</html>
